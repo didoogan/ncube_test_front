@@ -1,2 +1,5 @@
-npm -i <br />
-npm start
+**Instructions:**
+
+run: npm install
+
+run: npm start
