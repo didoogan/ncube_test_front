@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import axios from 'axios';
 import ProfileItem from '../../components/ProfileItem/ProfileItem';
 import Table from 'react-bootstrap/lib/Table';
+import Aux from '../../hoc/Aux';
 
 class Profiles extends Component {
   state = {
@@ -9,19 +10,30 @@ class Profiles extends Component {
     profilesLoaded: false
   }
   componentDidMount() {
-    axios.get('/profiles/')
-      .then(response => {
-        console.log(response)
-        this.setState({profiles: response.data, profilesLoaded: true})
-      })
+    this.loadProfies()
   }
 
-  sendInvite (name) {
-    alert('send invite hendler  ' + name);
+  componentDidUpdate () {
+    if (!this.state.profiles) { this.loadProfies() }
+  }
+
+  loadProfies = () => {
+    (async () => {
+      let response = await axios.get('/profiles/');
+      console.log(response);
+      this.setState({profiles: response.data, profilesLoaded: true});
+    })()
+  }
+
+  sendInviteHandler (profileId) {
+    (async () => {
+      let response = await axios.post('/send-invite/', {profile: profileId});
+      if (response.status === 200) { alert('Invitation has been successfully sent.')}
+    })()
   }
 
   render() {
-    let profiles = <tbody>Load data...</tbody>;
+    let profiles = 'Load data...';
     if(this.state.profilesLoaded) {
       profiles = this.state.profiles.map(profile =>
         (
@@ -33,12 +45,13 @@ class Profiles extends Component {
             phone={profile.phone}
             address={profile.address}
             invited={profile.invited}
-            clicked={() => this.sendInvite(profile.name)}
+            clicked={() => this.sendInviteHandler(profile.id)}
           ></ProfileItem>
         ))
     }
     return (
-        <Table striped bordered condensed hover>
+      <Aux>
+        <Table striped bordered condensed hover style={{margin: 'auto', width: '80%'}}>
           <thead>
           <tr>
             <th>Patient name</th>
@@ -50,6 +63,7 @@ class Profiles extends Component {
           </thead>
           {profiles}
         </Table>
+      </Aux>
     );
   }
 }
